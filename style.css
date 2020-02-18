@@ -1,0 +1,66 @@
+td{
+    width: 50px;
+    height: 50px;
+    background-color:rgb(226, 226, 226);
+}
+.field_sapper{
+    background-color:  rgb(197, 197, 197);
+    width: 100%;
+}
+td:hover{
+    background-color: grey;
+}
+td:active{
+    background-color: rgb(73, 73, 73);
+}
+.open{
+    background-color: white;
+    text-align: center;
+    font-size: 26px;
+    font-weight: 600;
+}
+.lock{
+    width: 0px; 
+    height: 0px;
+    border-top: 10px solid transparent;
+    border-left: 15px solid red;
+    border-bottom: 10px solid transparent;
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+}
+.lock:before{
+    position: absolute;
+    content: "";
+    height: 0px;
+    width: 25px;
+    border: 1px solid black;
+    background-color: black;
+    transform: rotate(90deg);
+    margin-left: -28px;
+    margin-top: 3px;
+    
+
+}
+
+.bomb{
+    width: 25px; 
+    height: 25px; 
+    margin: 10px;
+    background: black;
+    position: relative;
+    transform: rotate(20deg);
+}
+.bomb:after{
+    content: "";
+    height: 25px; 
+    width: 25px;
+    background: inherit;
+    position: absolute; 
+    top: 0; 
+    left: 0;
+    transform: rotate(135deg);
+}
+.bomb_not_found{
+    background-color: red;
+}
