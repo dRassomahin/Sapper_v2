@@ -234,6 +234,10 @@ class LevelDifficulty{                                                          
 };
 
 document.onreadystatechange = function () {
+
+
+
+    
     if (document.readyState == "interactive") {
         const form = document.querySelector('form.menu_sapper');
         const level = form.level.value;
@@ -264,6 +268,8 @@ document.onreadystatechange = function () {
         div.addEventListener("contextmenu", function(e){
             if(e.target.matches("td")) userInterface.cell_lock(e);
         });
+
+        document.querySelector('#StartGame').addEventListener('click', (event) => document.querySelector(".background_sapper").hidden = false);
     
     }
 };
@@ -274,5 +280,5 @@ Time = function (){
  let hour = 0;
  let minute = 0;
  let second = 0;
- 
+
 }

@@ -72,3 +72,9 @@ td:active{
     font-size: 26px;
     font-weight: 600;
 }
+
+.StartGame{
+    width: 50px;
+    height: 50px;
+    background-color: red;
+}
