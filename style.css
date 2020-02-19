@@ -64,3 +64,11 @@ td:active{
 .bomb_not_found{
     background-color: red;
 }
+
+.miss_lock{
+    background-color: blue;
+    color: white;
+    text-align: center;
+    font-size: 26px;
+    font-weight: 600;
+}

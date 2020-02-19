@@ -10,6 +10,17 @@ class UserInterface {
     field = [];
     mine = [];
     count_open_cells = 0;
+    count_flag_on_mine = 0;
+
+    clearField(){
+        document.querySelector("table").remove();
+        this.field = [];
+        this.mine = [];
+        this.count_open_cells = 0;
+        this.count_flag_on_mine = 0;
+        this.fillField();
+        this.createField();
+    }
 
     fillField() {                                                                       //Наполняем массив ячейками со свойствами
         for (let i = 0; i < levelDifficulty.height; i++){
@@ -25,11 +36,12 @@ class UserInterface {
             if(!this.field[x][y].is_mine){
                 this.field[x][y].is_mine = true;
                 this.field[x][y].count_around_mine = 0;
-                this.count_mine_around(x,y);
                 this.mine.push({x,y});
+                this.count_mine_around(x,y);
                 i++;
             }
         }
+        console.log(this.field);
     }
 
     count_mine_around(x,y) {                                                             //Подсчет количества мин вокруг мины
@@ -37,9 +49,9 @@ class UserInterface {
         let y_start = y > 0 ? y - 1: y;
         let x_end = x < levelDifficulty.width - 1 ? x + 1: x;
         let y_end = y < levelDifficulty.height - 1 ? y + 1: y;
-        for ( let i = x_start; i < x_end; i++){
-            for (let j = y_start; j < y_end; j++){
-                if(!(this.field[i][j].is_mine)) this.field[i][j].count_around_mine++;
+        for ( let i = x_start; i <= x_end; i++){
+            for (let j = y_start; j <= y_end; j++){
+                if(!(this.field[i][j].is_mine) && !(this.field[i][j].is_open)) this.field[i][j].count_around_mine++;
             }
         } 
     }
@@ -61,39 +73,127 @@ class UserInterface {
         let x = e.target.cellIndex;
         let y = e.target.parentNode.rowIndex;
         let stack = [{x, y}];
-        while(stack.length > 0) {
-            const {x , y} = stack.pop();
-            let x_left = x > 0 ? x - 1: x;
-            let x_right = x > 0 && x < levelDifficulty.width - 1 ? x + 1: x;
-            let y_up = y > 0 ? y - 1: y;
-            let y_down = y > 0 && y < levelDifficulty.height - 1 ? y + 1: y;
-            const cell = this.field[x][y];
-            console.log(cell)
-            if((!cell.is_mine) && (cell.count_around_mine >= 0) && !(cell.is_open)) {
-                cell.is_open = true;
-                this.count_open_cells++;
-                cell.el.innerHTML = cell.count_around_mine;
-                cell.el.classList.add("open");
-                if(cell.count_around_mine === 0) {
-                    if(!(this.field[x][y_up].is_mine) && !(this.field[x][y_up].is_open)) stack.push({x: x, y: y_up});
-                    if(!(this.field[x][y_down].is_mine) && !(this.field[x][y_down].is_open)) stack.push({x: x, y: y_down});
-                    if(!(this.field[x_left][y].is_mine) && !(this.field[x_left][y].is_open)) stack.push({x: x_left, y: y});
-                    if(!(this.field[x_right][y].is_mine) && !(this.field[x_right][y].is_open)) stack.push({x: x_right, y: y});
+        if(!this.field[x][y].is_mine){
+            while(stack.length > 0) {
+                const {x , y} = stack.pop();
+                let x_left = x > 0 ? x - 1: x;
+                let x_right = x >= 0 && x < levelDifficulty.width - 1 ? x + 1: x;
+                let y_up = y > 0 ? y - 1: y;
+                let y_down = y >= 0 && y < levelDifficulty.height - 1 ? y + 1: y;
+                if((!this.field[x][y].is_mine) && (this.field[x][y].count_around_mine >= 0) && !(this.field[x][y].is_open)) {
+                    this.field[x][y].is_open = true;
+                    this.count_open_cells++;
+                    if(!(this.field[x][y].count_around_mine === 0)) 
+                    this.field[x][y].el.innerHTML = this.field[x][y].count_around_mine;
+                    this.field[x][y].el.classList.add("open");
+                    if(this.field[x][y].count_around_mine === 0) {
+                        if(!(this.field[x][y_up].is_mine) && !(this.field[x][y_up].is_open)) stack.push({x: x, y: y_up});
+                        if(!(this.field[x][y_down].is_mine) && !(this.field[x][y_down].is_open)) stack.push({x: x, y: y_down});
+                        if(!(this.field[x_left][y].is_mine) && !(this.field[x_left][y].is_open)) stack.push({x: x_left, y: y});
+                        if(!(this.field[x_right][y].is_mine) && !(this.field[x_right][y].is_open)) stack.push({x: x_right, y: y});
+                    }
                 }
             }
         }
+        if(this.field[x][y].is_mine){
+
+            if(!this.field[x][y].el.querySelector("div")) {
+                let div = document.createElement("div");
+                div.classList.add("bomb");
+                this.field[x][y].el.appendChild(div);
+
+                for (let i = 0; i < this.mine.length; i++){
+                    if(!this.field[this.mine[i].x][this.mine[i].y].el.querySelector("div")){
+                        let div = document.createElement("div");
+                        div.classList.add("bomb");
+                        this.field[this.mine[i].x][this.mine[i].y].el.appendChild(div);
+                        this.field[this.mine[i].x][this.mine[i].y].el.classList.add('bomb_not_found');
+                    }
+                }
+                if(confirm("Вы проиграли, хотели бы продолжить?"))  this.clearField();
+
+            }
+
+        }
+        if((this.count_open_cells == (levelDifficulty.height * levelDifficulty.width - levelDifficulty.count_mine)) && (this.count_flag_on_mine == levelDifficulty.count_mine)){
+            if(confirm("Вы выйграли, хотели бы продолжить?")) this.clearField();
+        }
     }
+
+    full_open(e){
+        const x = e.target.cellIndex;
+        const y = e.target.parentNode.rowIndex;
+        let count_flag_around_point = 0;
+        const x_start = x > 0 ? x - 1: x;
+        const y_start = y > 0 ? y - 1:y;
+        const x_end = x < levelDifficulty.width - 1 ? x + 1: x;
+        const y_end = y < levelDifficulty.height - 1 ? y + 1: y;
+        let flag = false;
+
+        for ( let i = x_start; i <= x_end; i++){
+            for (let j = y_start; j <= y_end; j++){
+                 if(this.field[i][j].el.querySelector(".lock")){
+                    count_flag_around_point++;
+                 }
+            }
+        }
+
+        if (count_flag_around_point == this.field[x][y].count_around_mine){
+            for ( let i = x_start; i <= x_end; i++){
+                for (let j = y_start; j <= y_end; j++){
+                    if(this.field[i][j].is_mine) {
+                        flag = true
+                        if(this.field[i][j].el.querySelector(".lock")) this.field[i][j].el.querySelector(".lock").remove();
+                    }
+
+
+                    if(!this.field[i][j].is_open){
+                        if(!(this.field[i][j].count_around_mine === 0)) {
+                            if(this.field[i][j].el.querySelector(".lock")){
+                                this.field[i][j].el.innerHTML = this.field[i][j].count_around_mine;
+                                this.field[i][j].is_open = true;
+                                this.field[i][j].el.classList.add("miss_lock");
+                            }
+                            else{
+                                this.field[i][j].el.innerHTML = this.field[i][j].count_around_mine;
+                                this.field[i][j].is_open = true;
+                                this.field[i][j].el.classList.add("open");
+                            }
+                        
+                        }
+                        else{
+                            this.field[i][j].el.classList.add("open");
+                            this.field[i][j].is_open = true;
+                        }
+                        
+                    }
+            }
+        }
+
+        if(flag){
+            for (let i = 0; i < this.mine.length; i++){
+                let div = document.createElement("div");
+                div.classList.add("bomb");
+                this.field[this.mine[i].x][this.mine[i].y].el.appendChild(div);
+                this.field[this.mine[i].x][this.mine[i].y].el.classList.add('bomb_not_found');
+            }
+            if(confirm("Вы проиграли, хотели бы продолжить?"))  this.clearField();  
+        }
+    }
+}
 
     cell_lock(e){                                                                           //Установка флажка
         let x = e.target.cellIndex;
         let y = e.target.parentNode.rowIndex;
-        var div = document.createElement("div");
+        let div = document.createElement("div");
         if(this.field[x][y].is_open) return;
         else if(!(this.field[x][y].el.querySelector(".lock"))) {
             div.classList.add("lock") 
             this.field[x][y].el.appendChild(div);
         }
         else this.field[x][y].el.querySelector(".lock").remove();
+       
+        if(this.field[x][y].is_mine) this.count_flag_on_mine++;
 
         document.oncontextmenu = off_context_menu;
     }
@@ -140,6 +240,7 @@ document.onreadystatechange = function () {
 
         form.addEventListener('change', () => {
             levelDifficulty.updateLevel(form.level.value);
+            userInterface.clearField();
         })
 
         let div = document.querySelector(".field_sapper")
@@ -155,6 +256,11 @@ document.onreadystatechange = function () {
         div.addEventListener("click", function(e){
             if(e.target.matches("td")) userInterface.recurse_open(e);
         });
+        div.addEventListener("dblclick", function(e){
+            let x = e.target.cellIndex;
+            let y = e.target.parentNode.rowIndex;
+            if(userInterface.field[x][y].count_around_mine > 0) userInterface.full_open(e);
+        });
         div.addEventListener("contextmenu", function(e){
             if(e.target.matches("td")) userInterface.cell_lock(e);
         });
@@ -162,3 +268,11 @@ document.onreadystatechange = function () {
     }
 };
 
+
+Time = function (){
+ let timer = document.querySelector(".timer");
+ let hour = 0;
+ let minute = 0;
+ let second = 0;
+ 
+}
