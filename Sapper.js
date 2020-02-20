@@ -11,6 +11,7 @@ class UserInterface {
     mine = [];
     count_open_cells = 0;
     count_flag_on_mine = 0;
+    
 
     clearField(){
         document.querySelector("table").remove();
@@ -20,9 +21,14 @@ class UserInterface {
         this.count_flag_on_mine = 0;
         this.fillField();
         this.createField();
+        document.querySelector(".count_flag").innerHTML = levelDifficulty.count_flag;
+
     }
 
     fillField() {                                                                       //Наполняем массив ячейками со свойствами
+
+
+        
         for (let i = 0; i < levelDifficulty.height; i++){
             let tmp = [];
             for (let j = 0; j < levelDifficulty.width; j++){
@@ -41,7 +47,6 @@ class UserInterface {
                 i++;
             }
         }
-        console.log(this.field);
     }
 
     count_mine_around(x,y) {                                                             //Подсчет количества мин вокруг мины
@@ -110,12 +115,14 @@ class UserInterface {
                         this.field[this.mine[i].x][this.mine[i].y].el.classList.add('bomb_not_found');
                     }
                 }
+                clearTimeout(time.stop());
                 if(confirm("Вы проиграли, хотели бы продолжить?"))  this.clearField();
 
             }
 
         }
         if((this.count_open_cells == (levelDifficulty.height * levelDifficulty.width - levelDifficulty.count_mine)) && (this.count_flag_on_mine == levelDifficulty.count_mine)){
+            clearTimeout(time.stop());
             if(confirm("Вы выйграли, хотели бы продолжить?")) this.clearField();
         }
     }
@@ -177,6 +184,7 @@ class UserInterface {
                 this.field[this.mine[i].x][this.mine[i].y].el.appendChild(div);
                 this.field[this.mine[i].x][this.mine[i].y].el.classList.add('bomb_not_found');
             }
+            clearTimeout(time.stop());
             if(confirm("Вы проиграли, хотели бы продолжить?"))  this.clearField();  
         }
     }
@@ -190,10 +198,15 @@ class UserInterface {
         else if(!(this.field[x][y].el.querySelector(".lock"))) {
             div.classList.add("lock") 
             this.field[x][y].el.appendChild(div);
+            document.querySelector(".count_flag").innerHTML = --levelDifficulty.count_flag;
         }
-        else this.field[x][y].el.querySelector(".lock").remove();
+        else {
+            this.field[x][y].el.querySelector(".lock").remove();
+            document.querySelector(".count_flag").innerHTML = ++levelDifficulty.count_flag;
+        }
        
         if(this.field[x][y].is_mine) this.count_flag_on_mine++;
+
 
         document.oncontextmenu = off_context_menu;
     }
@@ -208,6 +221,7 @@ class LevelDifficulty{                                                          
     width = 0;
     height = 0;
     count_mine = 0;
+    count_flag = 0
 
     constructor(level) {
         this.updateLevel(level);
@@ -220,16 +234,19 @@ class LevelDifficulty{                                                          
         this.width = 10;
         this.height = 10;
         this.count_mine = 20;
+        this.count_flag = 20;
     }
     midle () {
         this.width = 15;
         this.height = 15;
         this.count_mine = 30;
+        this.count_flag = 30;
     }
     hard () {    
         this.width = 20;
         this.height = 20;
         this.count_mine = 40;
+        this.count_flag = 40;
     }
 };
 
@@ -245,13 +262,15 @@ document.onreadystatechange = function () {
         form.addEventListener('change', () => {
             levelDifficulty.updateLevel(form.level.value);
             userInterface.clearField();
+            time.stop();
+            time.start(0);
         })
 
         let div = document.querySelector(".field_sapper")
 
         userInterface = new UserInterface();
         levelDifficulty = new LevelDifficulty(level);
-
+        time = new Time();
         userInterface.fillField();
         userInterface.createField();
 
@@ -269,16 +288,51 @@ document.onreadystatechange = function () {
             if(e.target.matches("td")) userInterface.cell_lock(e);
         });
 
-        document.querySelector('#StartGame').addEventListener('click', (event) => document.querySelector(".background_sapper").hidden = false);
-    
+
+
+        document.querySelector('#StartGame').addEventListener('click', function(event) { 
+            document.querySelector(".background_sapper").hidden = false;
+            document.querySelector(".count_flag").innerHTML = levelDifficulty.count_flag;
+            time.stop();
+            time.start(0);
+        }); 
+
     }
 };
 
 
-Time = function (){
- let timer = document.querySelector(".timer");
- let hour = 0;
- let minute = 0;
- let second = 0;
+class Time {
+    timeout = null;
+    hour = 0;
+    minute = 0;
+    second = 0;
+
+    constructor() {
+        this.tick = this.tick.bind(this);
+    }
+
+    tick() {
+        if (this.second == 60){
+            this.second = 0;
+            this.minute++;
+        }
+        if (this.minute == 60){
+            this.minute = 0;
+            this.hour++;
+        };
+        document.querySelector(".timer").innerHTML = this.hour + ":" + this.minute + ":" + this.second++;
+        this.timeout = setTimeout(this.tick, 1000); 
+    }
+
+    start(second) {
+        this.second = second;
+        this.tick();
+    }
+
+    stop() {
+        clearTimeout(this.timeout);
+    }
+
+
 
 }

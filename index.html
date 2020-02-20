@@ -5,15 +5,20 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="StartGame" class="StartGame">></div>
+    <button id="StartGame" class="StartGame">Начать игру</button>
     <div class="background_sapper" hidden >
         <form class="menu_sapper">
-            <input type="radio" name="level" value="easy"  checked="true" > Легкий
-            <input type="radio" name="level" value="midle" > Средний
-            <input type="radio" name="level" value="hard"  > Сложный
-            <div class="timer"></div>
+            <label><input type="radio" name="level" class="myradio" value="easy"  checked="true" > Новичок</label>
+            <label><input type="radio" name="level" class="myradio" value="midle" >Любитель</label>
+            <label><input type="radio" name="level" class="myradio" value="hard"  >Профессионал</label>
         </form>
         <div class="field_sapper"></div>
+    </div>
+    <div class="achievements">
+        <div class="locks"></div>
+        <div class="count_flag"></div>
+        <div class="time_name">Время:</div>
+        <div class="timer"></div>
     </div>
     <script src="Sapper.js"></script>
 </body>

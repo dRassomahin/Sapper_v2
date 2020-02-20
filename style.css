@@ -1,11 +1,42 @@
+body{
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    grid-template-rows: repeat(3,100px, auto);
+}
+.background_sapper{
+    grid-column-start: 2;
+    grid-column-end: 2;
+    grid-row-start: 2;
+    grid-row-end: 2;
+}
+
+.StartGame{
+    grid-column-start: 2;
+    grid-column-end: 2;
+    grid-row-start:1;
+    grid-row-end: 1;
+}
+
+.menu_sapper{
+    margin-top: 10px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+table{
+    margin: auto;
+    table-layout: fixed;
+    width: 500px
+}
 td{
     width: 50px;
-    height: 50px;
+    height: 50px;      
     background-color:rgb(226, 226, 226);
+    border: 1px solid black;
 }
+
 .field_sapper{
     background-color:  rgb(197, 197, 197);
-    width: 100%;
 }
 td:hover{
     background-color: grey;
@@ -46,7 +77,7 @@ td:active{
 .bomb{
     width: 25px; 
     height: 25px; 
-    margin: 10px;
+    margin: 12px;
     background: black;
     position: relative;
     transform: rotate(20deg);
@@ -73,8 +104,84 @@ td:active{
     font-weight: 600;
 }
 
-.StartGame{
-    width: 50px;
-    height: 50px;
-    background-color: red;
+label {
+    color: black;
+    display: inline-block;
+    height: 2em;
+    line-height: 2em;
+    border: 1px solid;
+    padding: 0 .5em;
+    cursor: pointer;
+    display: inline-flex;
+    flex-direction: column;
+    vertical-align: middle;
+    border-radius: 1em;
+    overflow: hidden;
+  }
+  
+  input {
+    margin: 0;
+    flex: 0 0 2em;
+    order: 1;
+    font-size: inherit;
+    visibility: hidden;
+  }
+  
+  input:checked {
+    order: 3;
+  }
+  
+  label:after {
+    content: "";
+    flex: 0 0 2em;
+    margin: -2em -.5em 0;
+    background: silver;
+    order: 2;
+    z-index: -1;
+  }
+  .achievements{
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    grid-column-start: 2;
+    grid-column-end: 2;
+    grid-row-start:3;
+    grid-row-end: 3;
+    text-align: center;
+}
+.time_name{
+    font-size: 30px;
+    text-align: right;
+}
+  .count_flag{
+      margin-left: 10px;
+      text-align: left;
+      font-size: 30px;
+  }
+
+  .locks{
+    width: 0px; 
+    height: 0px;
+    border-top: 10px solid transparent;
+    border-left: 15px solid red;
+    border-bottom: 10px solid transparent;
+    margin-left: auto;
+}
+.locks:before{
+    position: absolute;
+    content: "";
+    height: 0px;
+    width: 25px;
+    border: 1px solid black;
+    background-color: black;
+    transform: rotate(90deg);
+    margin-left: -28px;
+    margin-top: 3px;
+    
+
+}
+
+.timer{
+    font-size: 30px;
+    text-align: center;
+    margin-top: 1px;
 }
