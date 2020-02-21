@@ -115,19 +115,23 @@ class UserInterface {
                         this.field[this.mine[i].x][this.mine[i].y].el.classList.add('bomb_not_found');
                     }
                 }
-                clearTimeout(time.stop());
-                if(confirm("Вы проиграли, хотели бы продолжить?"))  this.clearField();
-
-            }
-
+                time.stop();
+                setTimeout(() => this.lose(), 300);
+                
         }
+       
+    }
+    this.check_on_win();
+}
+
+    check_on_win(){
         if((this.count_open_cells == (levelDifficulty.height * levelDifficulty.width - levelDifficulty.count_mine)) && (this.count_flag_on_mine == levelDifficulty.count_mine)){
-            clearTimeout(time.stop());
-            if(confirm("Вы выйграли, хотели бы продолжить?")) this.clearField();
+            time.stop();
+            setTimeout(() => this.win(), 300);
         }
     }
 
-    full_open(e){
+    around_open(e){
         const x = e.target.cellIndex;
         const y = e.target.parentNode.rowIndex;
         let count_flag_around_point = 0;
@@ -135,60 +139,47 @@ class UserInterface {
         const y_start = y > 0 ? y - 1:y;
         const x_end = x < levelDifficulty.width - 1 ? x + 1: x;
         const y_end = y < levelDifficulty.height - 1 ? y + 1: y;
-        let flag = false;
 
-        for ( let i = x_start; i <= x_end; i++){
-            for (let j = y_start; j <= y_end; j++){
-                 if(this.field[i][j].el.querySelector(".lock")){
-                    count_flag_around_point++;
-                 }
+        for( let i = x_start; i <= x_end; i++){
+            for ( let j = y_start; j <= y_end; j++){
+                if (this.field[i][j].el.querySelector(".lock")) count_flag_around_point++;
             }
         }
 
         if (count_flag_around_point == this.field[x][y].count_around_mine){
-            for ( let i = x_start; i <= x_end; i++){
-                for (let j = y_start; j <= y_end; j++){
-                    if(this.field[i][j].is_mine) {
-                        flag = true
-                        if(this.field[i][j].el.querySelector(".lock")) this.field[i][j].el.querySelector(".lock").remove();
-                    }
-
-
-                    if(!this.field[i][j].is_open){
-                        if(!(this.field[i][j].count_around_mine === 0)) {
-                            if(this.field[i][j].el.querySelector(".lock")){
-                                this.field[i][j].el.innerHTML = this.field[i][j].count_around_mine;
-                                this.field[i][j].is_open = true;
-                                this.field[i][j].el.classList.add("miss_lock");
-                            }
-                            else{
-                                this.field[i][j].el.innerHTML = this.field[i][j].count_around_mine;
-                                this.field[i][j].is_open = true;
-                                this.field[i][j].el.classList.add("open");
-                            }
-                        
-                        }
-                        else{
-                            this.field[i][j].el.classList.add("open");
+            for( let i = x_start; i <= x_end; i++){
+                for ( let j = y_start; j <= y_end; j++){
+                    if(!this.field[i][j].is_open && !this.field[i][j].is_mine && !this.field[i][j].el.querySelector(".lock")){
+                        if(!(this.field[i][j].count_around_mine == 0)){
+                            this.count_open_cells++;
                             this.field[i][j].is_open = true;
+                            this.field[i][j].el.innerHTML = this.field[i][j].count_around_mine;
+                            this.field[i][j].el.classList.add("open");
                         }
-                        
+                        else {
+                            this.count_open_cells++;
+                            this.field[i][j].is_open = true;
+                            this.field[i][j].el.classList.add("open");
+                        }
                     }
+                    if(!this.field[i][j].is_open && this.field[i][j].is_mine && !this.field[i][j].el.querySelector(".lock")) {
+                        this.field[i][j].is_open = true;
+                        for (let i = 0; i < this.mine.length; i++){
+                            let div = document.createElement("div");
+                            div.classList.add("bomb");
+                            if(this.field[this.mine[i].x][this.mine[i].y].el.querySelector(".lock")) this.field[this.mine[i].x][this.mine[i].y].el.querySelector(".lock").remove();
+                            this.field[this.mine[i].x][this.mine[i].y].el.appendChild(div);
+                            this.field[this.mine[i].x][this.mine[i].y].el.classList.add('bomb_not_found');
+                        }
+                        time.stop();
+                        setTimeout(() => this.lose(), 300);
+                    }
+                    
+                }
             }
         }
-
-        if(flag){
-            for (let i = 0; i < this.mine.length; i++){
-                let div = document.createElement("div");
-                div.classList.add("bomb");
-                this.field[this.mine[i].x][this.mine[i].y].el.appendChild(div);
-                this.field[this.mine[i].x][this.mine[i].y].el.classList.add('bomb_not_found');
-            }
-            clearTimeout(time.stop());
-            if(confirm("Вы проиграли, хотели бы продолжить?"))  this.clearField();  
-        }
+        this.check_on_win();
     }
-}
 
     cell_lock(e){                                                                           //Установка флажка
         let x = e.target.cellIndex;
@@ -202,6 +193,7 @@ class UserInterface {
         }
         else {
             this.field[x][y].el.querySelector(".lock").remove();
+            this.count_flag_on_mine--;
             document.querySelector(".count_flag").innerHTML = ++levelDifficulty.count_flag;
         }
        
@@ -209,6 +201,15 @@ class UserInterface {
 
 
         document.oncontextmenu = off_context_menu;
+
+        this.check_on_win();
+    }
+
+    win (){
+        if(confirm("Вы выиграли, хотите продолжить?")) this.clearField();
+    }
+    lose(){
+        if(confirm("Вы проиграли, хотите продолжить?")) this.clearField();
     }
     
 };
@@ -233,20 +234,20 @@ class LevelDifficulty{                                                          
     easy () {
         this.width = 10;
         this.height = 10;
-        this.count_mine = 20;
-        this.count_flag = 20;
+        this.count_mine = 10;
+        this.count_flag = 10;
     }
     midle () {
         this.width = 15;
         this.height = 15;
-        this.count_mine = 30;
-        this.count_flag = 30;
+        this.count_mine = 20;
+        this.count_flag = 20;
     }
     hard () {    
         this.width = 20;
         this.height = 20;
-        this.count_mine = 40;
-        this.count_flag = 40;
+        this.count_mine = 30;
+        this.count_flag = 30;
     }
 };
 
@@ -282,7 +283,7 @@ document.onreadystatechange = function () {
         div.addEventListener("dblclick", function(e){
             let x = e.target.cellIndex;
             let y = e.target.parentNode.rowIndex;
-            if(userInterface.field[x][y].count_around_mine > 0) userInterface.full_open(e);
+            if(userInterface.field[x][y].count_around_mine > 0) userInterface.around_open(e);
         });
         div.addEventListener("contextmenu", function(e){
             if(e.target.matches("td")) userInterface.cell_lock(e);
@@ -325,6 +326,8 @@ class Time {
     }
 
     start(second) {
+        this.hour = 0;
+        this.minute = 0;
         this.second = second;
         this.tick();
     }
@@ -332,7 +335,4 @@ class Time {
     stop() {
         clearTimeout(this.timeout);
     }
-
-
-
 }
